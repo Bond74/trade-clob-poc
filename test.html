@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .left-panel {
+      flex: 1;
+    }
+    .right-panel {
+      flex: 1;
+      border-left: 1px solid #ccc;
+      padding-left: 20px;
+    }
+    #output, #trades {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    #trades {
+      background: #fff3cd;
+      border-color: #ffeaa7;
+    }
+  </style>
+</head>
+<body>
+  <h1>Order Book Tester</h1>
+  
+  <div style="margin-bottom: 20px;">
+    <label for="tickerSelect">Ticker: </label>
+    <select id="tickerSelect">
+      <option value="AAPL">AAPL</option>
+      <option value="AMZN">AMZN</option>
+      <option value="NVDA">NVDA</option>
+      <option value="BTC/USD">BTC/USD</option>
+      <option value="ETH/USD">ETH/USD</option>
+    </select>
+  </div>
+  
+  <div class="container">
+    <div class="left-panel">
+      <h2>Order Book State</h2>
+      <pre id="output"></pre>
+    </div>
+    
+    <div class="right-panel">
+      <h2>Executed Trades</h2>
+      <pre id="trades"></pre>
+    </div>
+  </div>
+  
+  <script>
+    const socket = io('ws://localhost:3000');
+
+    socket.on('connect', () => {
+      log('✅ Connected!');
+      
+      // Get initial book state for selected ticker
+      const selectedTicker = document.getElementById('tickerSelect').value;
+      socket.emit('getBookState', { ticker: selectedTicker }, (response) => {
+        log('Book State: ' + JSON.stringify(response, null, 2));
+      });
+    });
+
+    socket.on('orderBookUpdate:AAPL', (state) => {
+      log('Order Book Update (AAPL): ' + JSON.stringify(state, null, 2));
+    });
+
+    socket.on('orderBookUpdate:AMZN', (state) => {
+      log('Order Book Update (AMZN): ' + JSON.stringify(state, null, 2));
+    });
+
+    socket.on('orderBookUpdate:NVDA', (state) => {
+      log('Order Book Update (NVDA): ' + JSON.stringify(state, null, 2));
+    });
+
+    socket.on('orderBookUpdate:BTC/USD', (state) => {
+      log('Order Book Update (BTC/USD): ' + JSON.stringify(state, null, 2));
+    });
+
+    socket.on('orderBookUpdate:ETH/USD', (state) => {
+      log('Order Book Update (ETH/USD): ' + JSON.stringify(state, null, 2));
+    });
+
+    // Listen to trades for all tickers
+    socket.on('trades:AAPL', (trades) => {
+      logTrades('AAPL', trades);
+    });
+
+    socket.on('trades:AMZN', (trades) => {
+      logTrades('AMZN', trades);
+    });
+
+    socket.on('trades:NVDA', (trades) => {
+      logTrades('NVDA', trades);
+    });
+
+    socket.on('trades:BTC/USD', (trades) => {
+      logTrades('BTC/USD', trades);
+    });
+
+    socket.on('trades:ETH/USD', (trades) => {
+      logTrades('ETH/USD', trades);
+    });
+
+    // Handle ticker selection change
+    document.getElementById('tickerSelect').addEventListener('change', (event) => {
+      const selectedTicker = event.target.value;
+      socket.emit('getBookState', { ticker: selectedTicker }, (response) => {
+        log('Book State: ' + JSON.stringify(response, null, 2));
+      });
+    });
+
+    function log(msg) {
+      const output = document.getElementById('output');
+      output.textContent = msg + '\n'; // Clear and set new content
+    }
+
+    function logTrades(ticker, trades) {
+      const tradesElement = document.getElementById('trades');
+      const timestamp = new Date().toLocaleTimeString();
+      
+      trades.forEach(trade => {
+        const tradeMsg = `[${timestamp}] ${ticker}: ${trade.quantity} @ $${trade.price} (${trade.buyerId} ← ${trade.sellerId})\n`;
+        tradesElement.textContent += tradeMsg; // Append, don't clear
+      });
+      
+      // Auto-scroll to bottom
+      tradesElement.scrollTop = tradesElement.scrollHeight;
+    }
+  </script>
+</body>
+</html>
