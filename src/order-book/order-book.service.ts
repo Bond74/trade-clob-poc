@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { OrderBook } from '../clob/order-book';
-import { Order, Side, Trade, OrderBookState } from '../clob/types';
+import { Injectable } from "@nestjs/common";
+import { OrderBook } from "../clob/order-book";
+import { Order, Trade, OrderBookState, OrderPayload } from "../clob/types";
+import { randomBytes } from "node:crypto";
 
 @Injectable()
 export class OrderBookService {
   private orderBooks: Map<string, OrderBook> = new Map();
+  private readonly prefix = "order-";
 
   private getOrderBook(ticker: string): OrderBook {
     let ob = this.orderBooks.get(ticker);
@@ -15,16 +17,13 @@ export class OrderBookService {
     return ob;
   }
 
-  public placeOrder(orderData: {
-    ticker: string;
-    side: Side;
-    price: number;
-    quantity: number;
-    traderId: string;
-  }): { trades: Trade[]; orderBookState: OrderBookState } {
+  public placeOrder(orderData: OrderPayload): {
+    trades: Trade[];
+    orderBookState: OrderBookState;
+  } {
     const ob = this.getOrderBook(orderData.ticker);
     const order: Order = {
-      id: `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: this.getOrderId(),
       ticker: orderData.ticker,
       side: orderData.side,
       price: orderData.price,
@@ -41,7 +40,10 @@ export class OrderBookService {
     };
   }
 
-  public cancelOrder(ticker: string, orderId: string): { success: boolean; orderBookState: OrderBookState } {
+  public cancelOrder(
+    ticker: string,
+    orderId: string,
+  ): { success: boolean; orderBookState: OrderBookState } {
     const ob = this.getOrderBook(ticker);
     const success = ob.cancelOrder(orderId);
     return {
@@ -52,5 +54,9 @@ export class OrderBookService {
 
   public getBookState(ticker: string): OrderBookState {
     return this.getOrderBook(ticker).getState();
+  }
+
+  private getOrderId(): string {
+    return this.prefix + randomBytes(12).toString("hex");
   }
 }

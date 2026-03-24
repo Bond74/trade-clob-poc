@@ -1,6 +1,6 @@
 export enum Side {
-  BUY = 'BUY',
-  SELL = 'SELL',
+  BUY = "BUY",
+  SELL = "SELL",
 }
 
 export interface Order {
@@ -13,6 +13,11 @@ export interface Order {
   traderId: string;
   timestamp: number;
 }
+
+export type OrderPayload = Omit<
+  Order,
+  "id" | "remainingQuantity" | "timestamp"
+>;
 
 export interface Trade {
   id: string;
