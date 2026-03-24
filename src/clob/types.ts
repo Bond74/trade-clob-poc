@@ -31,7 +31,7 @@ export interface Trade {
   timestamp: number;
 }
 
-export interface PriceLevel {
+export interface PriceLevelInfo {
   price: number;
   totalQuantity: number;
   orders: Order[];
@@ -39,6 +39,6 @@ export interface PriceLevel {
 
 export interface OrderBookState {
   ticker: string;
-  bids: PriceLevel[];
-  asks: PriceLevel[];
+  bids: PriceLevelInfo[];
+  asks: PriceLevelInfo[];
 }

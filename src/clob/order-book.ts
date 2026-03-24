@@ -1,5 +1,5 @@
-import { DoublyLinkedList, Node } from './doubly-linked-list';
-import { Order, Side, Trade, PriceLevel as PriceLevelState, OrderBookState } from './types';
+import { DoublyLinkedList, Node } from "./doubly-linked-list";
+import { Order, Side, Trade, OrderBookState } from "./types";
 
 export class PriceLevel {
   public orders: DoublyLinkedList = new DoublyLinkedList();
@@ -21,7 +21,8 @@ export class PriceLevel {
 export class OrderBook {
   private bids: PriceLevel[] = []; // Sorted Descending (highest buy first)
   private asks: PriceLevel[] = []; // Sorted Ascending (lowest sell first)
-  private ordersMap: Map<string, { priceLevel: PriceLevel; node: Node }> = new Map();
+  private ordersMap: Map<string, { priceLevel: PriceLevel; node: Node }> =
+    new Map();
 
   constructor(public readonly ticker: string) {}
 
@@ -34,9 +35,10 @@ export class OrderBook {
       const bestPriceLevel = opposingSide[0];
 
       // Check if price matches
-      const isMatch = order.side === Side.BUY 
-        ? order.price >= bestPriceLevel.price 
-        : order.price <= bestPriceLevel.price;
+      const isMatch =
+        order.side === Side.BUY
+          ? order.price >= bestPriceLevel.price
+          : order.price <= bestPriceLevel.price;
 
       if (!isMatch) break;
 
@@ -47,7 +49,10 @@ export class OrderBook {
       }
 
       const matchingOrder = head.order;
-      const matchedQuantity = Math.min(order.remainingQuantity, matchingOrder.remainingQuantity);
+      const matchedQuantity = Math.min(
+        order.remainingQuantity,
+        matchingOrder.remainingQuantity,
+      );
 
       // Create Trade
       trades.push({
@@ -55,8 +60,10 @@ export class OrderBook {
         ticker: this.ticker,
         price: bestPriceLevel.price,
         quantity: matchedQuantity,
-        buyerId: order.side === Side.BUY ? order.traderId : matchingOrder.traderId,
-        sellerId: order.side === Side.SELL ? order.traderId : matchingOrder.traderId,
+        buyerId:
+          order.side === Side.BUY ? order.traderId : matchingOrder.traderId,
+        sellerId:
+          order.side === Side.SELL ? order.traderId : matchingOrder.traderId,
         buyOrderId: order.side === Side.BUY ? order.id : matchingOrder.id,
         sellOrderId: order.side === Side.SELL ? order.id : matchingOrder.id,
         timestamp: Date.now(),
@@ -131,7 +138,7 @@ export class OrderBook {
     // Clean up empty price level
     if (priceLevel.orders.length === 0) {
       const side = node.order.side === Side.BUY ? this.bids : this.asks;
-      const index = side.findIndex(pl => pl.price === priceLevel.price);
+      const index = side.findIndex((pl) => pl.price === priceLevel.price);
       if (index !== -1) side.splice(index, 1);
     }
 
@@ -141,8 +148,16 @@ export class OrderBook {
   public getState(): OrderBookState {
     return {
       ticker: this.ticker,
-      bids: this.bids.map(pl => ({ price: pl.price, totalQuantity: pl.totalQuantity, orders: pl.orders.toArray() })),
-      asks: this.asks.map(pl => ({ price: pl.price, totalQuantity: pl.totalQuantity, orders: pl.orders.toArray() })),
+      bids: this.bids.map((pl) => ({
+        price: pl.price,
+        totalQuantity: pl.totalQuantity,
+        orders: pl.orders.toArray(),
+      })),
+      asks: this.asks.map((pl) => ({
+        price: pl.price,
+        totalQuantity: pl.totalQuantity,
+        orders: pl.orders.toArray(),
+      })),
     };
   }
 }
