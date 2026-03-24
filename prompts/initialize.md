@@ -19,7 +19,7 @@ The engine must follow "Price-Time Priority" logic:
 ### Performance & Data Structures
 
 - Use an in-memory approach (no database).
-- For efficiency, the OrderBook should use a Map for O(1) order lookups and a sorted structure (like a Red-Black Tree or a sorted Array with Binary Search) for price levels.
+- For efficiency, the OrderBook should use a Map for O(1) order lookups and a sorted structure (like a sorted Array with Binary Search) for price levels.
 - Each price level should contain a Doubly Linked List of orders to ensure O(1) insertions and removals while maintaining time priority.
 
 ### Functional Requirements
@@ -32,7 +32,7 @@ The engine must follow "Price-Time Priority" logic:
    - If a match occurs, generate a `Trade` event and update/remove the involved orders.
    - If partially filled or unfilled, add the remainder to the book.
 3. **Broadcasting**:
-   - Every state change (New Order, Trade, Cancel) must broadcast the updated "Top of Book" (L1) or the full aggregated Book (L2) to connected clients.
+   - Every state change (New Order, Trade, Cancel) must broadcast the updated state of the Order Book to connected clients.
 
 ### Project Structure
 
